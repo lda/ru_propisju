@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 $KCODE = 'u' if RUBY_VERSION < '1.9.0'
+# require 'bigdecimal'
 
 # Самый лучший, прекрасный, кривой и неотразимый суперпечататель суммы прописью для Ruby.
 #
@@ -485,7 +486,7 @@ module RuPropisju
       parts << propisju_int(amount.to_i, money_gender, integrals, locale) unless amount.to_i == 0
     end
 
-    if amount.kind_of?(Float)
+    if amount.kind_of?(Float) || amount.kind_of?(BigDecimal)
       remainder = (amount.divmod(1)[1]*100).round
       if remainder == 100
         parts = [propisju_int(amount.to_i + 1, money_gender, integrals, locale)]
@@ -662,7 +663,7 @@ module RuPropisju
     end.freeze
 
     # Укорачиваем до триллионной доли
-    formatted = num.to_s[/^\d+(\.\d{0,#{words.length}})?/].gsub(/0+$/, '')
+    formatted = format('%f', num)[/^\d+(\.\d{0,#{words.length}})?/].gsub(/0+$/, '')
     wholes, decimals = formatted.split(".")
 
     return propisju_int(wholes.to_i, 1, [], locale) if decimals.to_i.zero?
