@@ -492,7 +492,7 @@ module RuPropisju
       end
     end
 
-    if amount.kind_of?(Float) || (defined?(BigDecimal) && amount.kind_of?(BigDecimal))
+    if amount.kind_of?(Float)
       remainder = (amount.divmod(1)[1]*100).round
       if remainder == 100
         parts = [propisju_int(amount.to_i + 1, money_gender, integrals, locale)]
@@ -672,8 +672,7 @@ module RuPropisju
     end.freeze
 
     # Укорачиваем до триллионной доли
-    str_num = (defined?(BigDecimal) && num.kind_of?(BigDecimal)) ? num.to_s('F') : num.to_s
-    formatted = str_num[/^\d+(\.\d{0,#{words.length - 1}})?/].gsub(/0+$/, '')
+    formatted = num.to_s[/^\d+(\.\d{0,#{words.length - 1}})?/].gsub(/0+$/, '')
     wholes, decimals = formatted.split(".")
 
     return propisju_int(wholes.to_i, 1, [], locale) if decimals.to_i.zero?
