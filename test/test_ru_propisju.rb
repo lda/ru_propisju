@@ -211,7 +211,7 @@ class TestRuPropisju < Test::Unit::TestCase
     assert_equal "триста сорок одна целая двести сорок пять тысячных", RuPropisju.propisju(341.245, 1)
     assert_equal "двести три целых сорок одна сотая", RuPropisju.propisju(203.41, 1)
     assert_equal "четыреста сорок две целых пять десятых", RuPropisju.propisju(442.50000, 1)
-
+    assert_equal "одна тысяча триста тридцать три целых сто двадцать три миллиарда четыреста пятьдесят шесть миллионов семьсот восемьдесят девять тысяч двенадцать триллионных", RuPropisju.propisju(1333.1234567890123456789, 1)
     # предложный падеж русской локали
     assert_equal "шести целых пяти десятых", RuPropisju.propisju(6.50, 1, :ru_in)
     assert_equal "шести", RuPropisju.propisju(6.0, 1, :ru_in)
@@ -277,7 +277,6 @@ class TestRuPropisju < Test::Unit::TestCase
   def test_options
     # всегда отображать копейки
     options = { :always_show_fraction => true }
-
     assert_equal "ноль рублей 0 копеек", RuPropisju.rublej(0, :ru, options)
     assert_equal "сто двадцать три рубля 0 копеек", RuPropisju.rublej(123, :ru, options)
     assert_equal "триста сорок три рубля 20 копеек", RuPropisju.rublej(343.20, :ru, options)
