@@ -3,6 +3,7 @@ $KCODE = 'u' if RUBY_VERSION < '1.9.0'
 
 require "test/unit"
 require "ru_propisju"
+require "bigdecimal"
 
 class TestRuPropisju < Test::Unit::TestCase
 
@@ -111,7 +112,6 @@ class TestRuPropisju < Test::Unit::TestCase
     assert_equal "шестьсот двенадцать", RuPropisju.propisju(612, 1)
     assert_equal "ноль", RuPropisju.propisju(0, 1)
 
-
     # предложный падеж для русской локали
     assert_equal "пятистах двадцати трёх", RuPropisju.propisju(523, 1, :ru_in)
     assert_equal "шести тысячах семистах двадцати семи", RuPropisju.propisju(6727, 1, :ru_in)
@@ -151,7 +151,6 @@ class TestRuPropisju < Test::Unit::TestCase
     assert_equal "шестьюстами двенадцатью", RuPropisju.propisju(612, 1, :ru_from)
     assert_equal "нулём", RuPropisju.propisju(0, 1, :ru_from)
 
-
     # ukrainian locale
     assert_equal "п'ятьсот двадцять три", RuPropisju.propisju(523, 1, :ua)
     assert_equal "шість тисяч сімсот двадцять сім", RuPropisju.propisju(6727, 1, :ua)
@@ -161,7 +160,6 @@ class TestRuPropisju < Test::Unit::TestCase
     assert_equal "сорок п'ять", RuPropisju.propisju(45, 1, :ua)
     assert_equal "п'ять", RuPropisju.propisju(5, 1, :ua)
     assert_equal "шістсот дванадцять", RuPropisju.propisju(612, 1, :ua)
-
   end
 
   def test_propisju_shtuk
@@ -214,7 +212,7 @@ class TestRuPropisju < Test::Unit::TestCase
     assert_equal "триста сорок одна целая двести сорок пять тысячных", RuPropisju.propisju(341.245, 1)
     assert_equal "двести три целых сорок одна сотая", RuPropisju.propisju(203.41, 1)
     assert_equal "четыреста сорок две целых пять десятых", RuPropisju.propisju(442.50000, 1)
-
+    assert_equal "одна тысяча триста тридцать три целых сто двадцать три миллиарда четыреста пятьдесят шесть миллионов семьсот восемьдесят девять тысяч двенадцать триллионных", RuPropisju.propisju(1333.1234567890123456789, 1)
     # предложный падеж русской локали
     assert_equal "шести целых пяти десятых", RuPropisju.propisju(6.50, 1, :ru_in)
     assert_equal "шести", RuPropisju.propisju(6.0, 1, :ru_in)
@@ -261,6 +259,67 @@ class TestRuPropisju < Test::Unit::TestCase
     end
   end
 
+  def test_propisju_for_bigdecimal
+    test_number_6_5 = BigDecimal(6.50, 10)
+    test_number_6_0 = BigDecimal.new(6.0, 10)
+    test_number_6 = BigDecimal.new(6)
+    test_number_3 = BigDecimal(3, 10)
+    test_number_30 = BigDecimal(30.0, 10)
+    test_number_30_1 = BigDecimal(30.1, 10)
+    test_number_203_41 = BigDecimal(203.41, 10)
+    test_number_341_9 = BigDecimal(341.9, 10)
+    test_number_341_245 = BigDecimal(341.245, 10)
+    test_number_442_5 = BigDecimal(442.50000, 10)
+
+    assert_equal "два миллиарда пятьдесят три целых двести пятьдесят девять тысячных", RuPropisju.propisju(BigDecimal(2_000_000_053.259, 15), 1)
+    assert_equal "одна тысяча триста тридцать три целых сто двадцать три миллиарда четыреста пятьдесят шесть миллионов семьсот восемьдесят девять тысяч двенадцать триллионных", RuPropisju.propisju(BigDecimal(1333.1234567890123456789, 16), 1)
+    assert_equal "шесть целых пять десятых", RuPropisju.propisju(test_number_6_5, 1)
+    assert_equal "шесть", RuPropisju.propisju(test_number_6_0, 1)
+    assert_equal "шесть", RuPropisju.propisju(test_number_6, 1)
+    assert_equal "тридцать миллиардов целых сто одиннадцать тысячных", RuPropisju.propisju(test_number_3 * 10**10 + 0.111, 1)
+    assert_equal "тридцать целых одна десятая", RuPropisju.propisju(test_number_30_1, 1)
+    assert_equal "двести три целых сорок одна сотая", RuPropisju.propisju(test_number_203_41, 1)
+
+    # предложный падеж русской локали
+    assert_equal "шести целых пяти десятых", RuPropisju.propisju(test_number_6_5, 1, :ru_in)
+    assert_equal "шести", RuPropisju.propisju(test_number_6_0, 1, :ru_in)
+    assert_equal "тридцати миллиардах целых ста одиннадцати тысячных", RuPropisju.propisju(test_number_3 * 10**10 + 0.111, 1, :ru_in)
+    assert_equal "тридцати", RuPropisju.propisju(test_number_30, 1, :ru_in)
+    assert_equal "тридцати целых одной десятой", RuPropisju.propisju(test_number_30_1, 1, :ru_in)
+    assert_equal "трёхстах сорока одной целой девяти десятых", RuPropisju.propisju(test_number_341_9, 1, :ru_in)
+    assert_equal "трёхстах сорока одной целой двухстах сорока пяти тысячных", RuPropisju.propisju(test_number_341_245, 1, :ru_in)
+    assert_equal "двухстах трёх целых сорока одной сотой", RuPropisju.propisju(test_number_203_41, 1, :ru_in)
+    assert_equal "четырёхстах сорока двух целых пяти десятых", RuPropisju.propisju(test_number_442_5, 1, :ru_in)
+
+    # родительный падеж русской локали
+    assert_equal 'шести целых пяти десятых', RuPropisju.propisju(test_number_6_5, 1, :ru_gen)
+    assert_equal 'шести', RuPropisju.propisju(test_number_6_0, 1, :ru_gen)
+    assert_equal 'тридцати миллиардов целых ста одиннадцати тысячных', RuPropisju.propisju(test_number_3 * 10**10 + 0.111, 1, :ru_gen)
+    assert_equal 'тридцати', RuPropisju.propisju(test_number_30, 1, :ru_gen)
+    assert_equal 'тридцати целых одной десятой', RuPropisju.propisju(test_number_30_1, 1, :ru_gen)
+    assert_equal 'трёхсот сорока одной целой девяти десятых', RuPropisju.propisju(test_number_341_9, 1, :ru_gen)
+    assert_equal 'трёхсот сорока одной целой двухсот сорока пяти тысячных', RuPropisju.propisju(test_number_341_245, 1, :ru_gen)
+    assert_equal 'двухсот трёх целых сорока одной сотой', RuPropisju.propisju(test_number_203_41, 1, :ru_gen)
+    assert_equal 'четырёхсот сорока двух целых пяти десятых', RuPropisju.propisju(test_number_442_5, 1, :ru_gen)
+
+    # творительный падеж русской локали
+    assert_equal "шестью целыми пятью десятыми", RuPropisju.propisju(test_number_6_5, 1, :ru_from)
+    assert_equal "шестью", RuPropisju.propisju(test_number_6_0, 1, :ru_from)
+    assert_equal "тридцатью миллиардами целыми ста одиннадцатью тысячными", RuPropisju.propisju(test_number_3 * 10**10 + 0.111, 1, :ru_from)
+    assert_equal "тридцатью", RuPropisju.propisju(test_number_30, 1, :ru_from)
+    assert_equal "тридцатью целыми одной десятой", RuPropisju.propisju(test_number_30_1, 1, :ru_from)
+    assert_equal "тремястами сорока одной целой девятью десятыми", RuPropisju.propisju(test_number_341_9, 1, :ru_from)
+    assert_equal "тремястами сорока одной целой двумястами сорока пятью тысячными", RuPropisju.propisju(test_number_341_245, 1, :ru_from)
+    assert_equal "двумястами тремя целыми сорока одной сотой", RuPropisju.propisju(test_number_203_41, 1, :ru_from)
+    assert_equal "четырьмястами сорока двумя целыми пятью десятыми", RuPropisju.propisju(test_number_442_5, 1, :ru_from)
+
+    # ua locale
+    assert_equal "шість цілих п'ять десятих", RuPropisju.propisju(test_number_6_5, 1, :ua)
+    assert_equal "триста сорок одна ціла дев'ять десятих", RuPropisju.propisju(test_number_341_9, 1, :ua)
+    assert_equal "триста сорок одна ціла двісті сорок п'ять тисячних", RuPropisju.propisju(test_number_341_245, 1, :ua)
+    assert_equal "двісті три цілих сорок одна сота", RuPropisju.propisju(test_number_203_41, 1, :ua)
+    assert_equal "чотириста сорок дві цілих п'ять десятих", RuPropisju.propisju(test_number_442_5, 1, :ua)
+  end
 
   def test_choose_plural
     assert_equal "чемодана", RuPropisju.choose_plural(523, ["чемодан", "чемодана", "чемоданов"])
@@ -278,6 +337,57 @@ class TestRuPropisju < Test::Unit::TestCase
     assert_equal "колес", RuPropisju.choose_plural(260, ["колесо", "колеса", "колес"])
   end
 
+  def test_options
+    # всегда отображать копейки
+    options = { always_show_fraction: true }
+
+    assert_equal "ноль рублей 0 копеек", RuPropisju.rublej(0, :ru, options)
+    assert_equal "сто двадцать три рубля 0 копеек", RuPropisju.rublej(123, :ru, options)
+    assert_equal "триста сорок три рубля 20 копеек", RuPropisju.rublej(343.20, :ru, options)
+    assert_equal "триста сорок три рубля 70 копеек", RuPropisju.rublej(343.70, :ru, options)
+
+    assert_equal "42 копейки", RuPropisju.rublej(0.4187, :ru, options)
+    assert_equal "триста тридцать два рубля 0 копеек", RuPropisju.rublej(331.995, :ru, options)
+    assert_equal "один рубль 0 копеек", RuPropisju.rubl(1, :ru, options)
+    assert_equal "три рубля 14 копеек", RuPropisju.rublja(3.14, :ru, options)
+    assert_equal "три рубля 2 копейки", RuPropisju.rublja(3.02, :ru, options)
+    assert_equal "одна тысяча рублей 0 копеек", RuPropisju.rublja(1000, :ru, options)
+
+    assert_equal "1000 рублей 0 копеек", RuPropisju.digit_rublej(1000, :ru, options)
+    assert_equal "345 рублей 2 копейки", RuPropisju.digit_rublej(345.02, :ru, options)
+    assert_equal "4 рубля 60 копеек", RuPropisju.digit_rublej(4.60, :ru, options)
+
+    assert_equal "1000 рублей 0 копеек", RuPropisju.digit_rublej(BigDecimal(1000), :ru, options)
+    assert_equal "345 рублей 2 копейки", RuPropisju.digit_rublej(BigDecimal(345.02, 10), :ru, options)
+    assert_equal "4 рубля 60 копеек", RuPropisju.digit_rublej(BigDecimal(4.59999, 10), :ru, options)
+
+    # форматировение
+    options_custom_formatter = { fraction_formatter: '%02d', integrals_formatter: '+%d', integrals_delimiter: ' ', always_show_fraction: true }
+    assert_equal "ноль рублей 00 копеек", RuPropisju.rublej(0, :ru, options_custom_formatter)
+    assert_equal "сто двадцать три рубля 00 копеек", RuPropisju.rublej(123, :ru, options_custom_formatter)
+    assert_equal "триста сорок три рубля 20 копеек", RuPropisju.rublej(343.20, :ru, options_custom_formatter)
+
+    assert_equal "42 копейки", RuPropisju.rublej(0.4187, :ru, options_custom_formatter)
+    assert_equal "триста тридцать два рубля 00 копеек", RuPropisju.rublej(331.995, :ru, options_custom_formatter)
+    assert_equal "один рубль 00 копеек", RuPropisju.rubl(1, :ru, options_custom_formatter)
+    assert_equal "три рубля 14 копеек", RuPropisju.rublja(3.14, :ru, options_custom_formatter)
+    assert_equal "три рубля 02 копейки", RuPropisju.rublja(3.02, :ru, options_custom_formatter)
+    assert_equal "одна тысяча рублей 00 копеек", RuPropisju.rublja(1000, :ru, options_custom_formatter)
+    assert_equal "триста тридцать два рубля 00 копеек", RuPropisju.rublja(BigDecimal(331.995, 10), :ru, options_custom_formatter)
+
+    assert_equal "+1 000 рублей 00 копеек", RuPropisju.digit_rublej(1000, :ru, options_custom_formatter)
+    assert_equal "+1 000 рублей 00 копеек", RuPropisju.digit_rublej(1000.0, :ru, options_custom_formatter)
+    assert_equal "+345 рублей 02 копейки", RuPropisju.digit_rublej(345.02, :ru, options_custom_formatter)
+    assert_equal "+1 000 рублей 00 копеек", RuPropisju.digit_rublej(BigDecimal(1000), :ru, options_custom_formatter)
+    assert_equal "+345 рублей 02 копейки", RuPropisju.digit_rublej(BigDecimal(345.02, 10), :ru, options_custom_formatter)
+
+    assert_equal "триста тридцять дві гривні 00 копійок", RuPropisju.griven(331.995, :ua, options_custom_formatter)
+    assert_equal "три тенге 00 тиынов", RuPropisju.tenge(3, :ru, options_custom_formatter)
+    assert_equal "триста сорок пять долларов два цента", RuPropisju.dollarov(345.02, :ru, options_custom_formatter)
+    assert_equal "три доллара 00 центов", RuPropisju.dollarov(3, :ru, options_custom_formatter)
+    assert_equal "три евро 00 центов", RuPropisju.evro(3, :ru, options_custom_formatter)
+  end
+
   def test_rublej
     assert_equal "ноль рублей 0 копеек", RuPropisju.rublej(0)
     assert_equal "сто двадцать три рубля", RuPropisju.rublej(123)
@@ -286,6 +396,17 @@ class TestRuPropisju < Test::Unit::TestCase
     assert_equal "триста тридцать два рубля", RuPropisju.rublej(331.995)
     assert_equal "один рубль", RuPropisju.rubl(1)
     assert_equal "три рубля 14 копеек", RuPropisju.rublja(3.14)
+    assert_equal "три рубля 2 копейки", RuPropisju.rublja(3.02)
+    assert_equal "одна тысяча рублей", RuPropisju.rublja(1000)
+    assert_equal "одна тысяча рублей", RuPropisju.rublja(1000)
+    assert_equal "два миллиарда пятьдесят три рубля 26 копеек", RuPropisju.rublej(BigDecimal(2_000_000_053.259, 15))
+    assert_equal "1000 рублей", RuPropisju.digit_rublej(1000)
+    assert_equal "345 рублей 2 копейки", RuPropisju.digit_rublej(345.02)
+
+    assert_equal "ноль рублей 0 копеек", RuPropisju.rublej(BigDecimal(0.0, 10))
+    assert_equal "сто двадцать три рубля", RuPropisju.rublej(BigDecimal(123, 10))
+    assert_equal "триста сорок три рубля 20 копеек", RuPropisju.rublej(BigDecimal(343.20, 10))
+    assert_equal "три рубля 2 копейки", RuPropisju.rublja(BigDecimal(3.02, 10))
 
     # ru locale предложный падеж
     assert_equal "нуле рублях 0 копейках", RuPropisju.rublej(0, :ru_in)
