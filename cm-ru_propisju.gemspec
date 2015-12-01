@@ -4,7 +4,7 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{ru_propisju}
+  s.name = %q{cm-ru_propisju}
   s.version = "2.4.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "lib/ru_propisju.rb",
-    "ru_propisju.gemspec",
+    "cm-ru_propisju.gemspec",
     "test/test_ru_propisju.rb"
   ]
   s.homepage = %q{http://github.com/julik/ru_propisju}
